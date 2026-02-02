@@ -74,7 +74,11 @@ export function useSnakeGame(options: UseSnakeGameOptions = {}) {
     resetGame(newMode);
   }, [resetGame]);
   
-  // Game loop
+  // Store callbacks in refs to avoid effect re-runs
+  const onGameOverRef = useRef(onGameOver);
+  onGameOverRef.current = onGameOver;
+  
+  // Game loop - only depend on status to prevent multiple loops
   useEffect(() => {
     if (gameState.status !== 'playing') {
       if (gameLoopRef.current) {
@@ -84,23 +88,25 @@ export function useSnakeGame(options: UseSnakeGameOptions = {}) {
       return;
     }
     
-    let lastTime = 0;
+    let lastTime = performance.now();
     
     const loop = (currentTime: number) => {
-      if (currentTime - lastTime >= gameState.speed) {
-        lastTime = currentTime;
+      setGameState(prev => {
+        // Only tick if enough time has passed
+        if (currentTime - lastTime < prev.speed) {
+          return prev;
+        }
         
-        setGameState(prev => {
-          const newState = gameTick(prev, gridSize, DEFAULT_CONFIG);
-          
-          // Check for game over
-          if (newState.status === 'game-over' && prev.status === 'playing') {
-            onGameOver?.(newState.score);
-          }
-          
-          return newState;
-        });
-      }
+        lastTime = currentTime;
+        const newState = gameTick(prev, gridSize, DEFAULT_CONFIG);
+        
+        // Check for game over
+        if (newState.status === 'game-over' && prev.status === 'playing') {
+          onGameOverRef.current?.(newState.score);
+        }
+        
+        return newState;
+      });
       
       gameLoopRef.current = requestAnimationFrame(loop);
     };
@@ -110,9 +116,10 @@ export function useSnakeGame(options: UseSnakeGameOptions = {}) {
     return () => {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
       }
     };
-  }, [gameState.status, gameState.speed, gridSize, onGameOver]);
+  }, [gameState.status, gridSize]);
   
   // Keyboard controls
   useEffect(() => {

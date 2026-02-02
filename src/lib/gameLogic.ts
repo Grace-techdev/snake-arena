@@ -144,8 +144,10 @@ export function gameTick(state: GameState, gridSize: number, config: GameConfig)
     return { ...state, status: 'game-over' };
   }
   
-  // Check self collision
-  if (checkSelfCollision(newHead, state.snake)) {
+  // Check self collision - but exclude the tail since it will move
+  // We need to check against the snake body WITHOUT the last segment (since it moves away)
+  const bodyToCheck = state.snake.slice(0, -1);
+  if (bodyToCheck.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
     return { ...state, status: 'game-over' };
   }
   
