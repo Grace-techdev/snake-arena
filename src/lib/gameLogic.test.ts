@@ -293,17 +293,19 @@ describe('gameTick', () => {
   });
 
   it('ends game on self collision', () => {
+    // Snake forming a loop where head will collide with body
+    // Snake: head at (5,5) moving RIGHT, body wraps around
     const state = createPlayingState({
       snake: [
-        { x: 10, y: 10 },
-        { x: 11, y: 10 },
-        { x: 11, y: 11 },
-        { x: 10, y: 11 },
-        { x: 9, y: 11 },
-        { x: 9, y: 10 },
+        { x: 5, y: 5 },   // head - moving RIGHT to (6, 5)
+        { x: 5, y: 6 },   // segment 1
+        { x: 6, y: 6 },   // segment 2
+        { x: 6, y: 5 },   // segment 3 - will collide with new head!
+        { x: 7, y: 5 },   // tail - will be removed
       ],
-      direction: 'LEFT',
+      direction: 'RIGHT',
     });
+    
     const newState = gameTick(state, 20, DEFAULT_CONFIG);
     
     expect(newState.status).toBe('game-over');

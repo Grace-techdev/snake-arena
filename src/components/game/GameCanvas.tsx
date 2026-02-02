@@ -41,7 +41,7 @@ export const GameCanvas = memo(function GameCanvas({
       {snake.map((segment, index) => (
         <div
           key={`snake-${index}`}
-          className={`absolute transition-all duration-75 ${
+          className={`absolute ${
             index === 0 
               ? 'bg-primary rounded-sm z-10' 
               : 'bg-primary/80 rounded-sm'
