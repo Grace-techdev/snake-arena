@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Retro Arcade Snake Game Design System */
+
+@layer base {
+  :root {
+    /* Dark arcade theme - always dark */
+    --background: 240 10% 4%;
+    --foreground: 120 100% 50%;
+
+    --card: 240 10% 8%;
+    --card-foreground: 120 100% 50%;
+
+    --popover: 240 10% 6%;
+    --popover-foreground: 120 100% 50%;
+
+    /* Neon green primary */
+    --primary: 120 100% 50%;
+    --primary-foreground: 240 10% 4%;
+
+    /* Cyan accent */
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 240 10% 4%;
+
+    --muted: 240 10% 15%;
+    --muted-foreground: 120 40% 60%;
+
+    --accent: 180 100% 50%;
+    --accent-foreground: 240 10% 4%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 100% 25%;
+    --input: 240 10% 12%;
+    --ring: 120 100% 50%;
+
+    --radius: 0.25rem;
+
+    /* Game-specific colors */
+    --snake: 120 100% 50%;
+    --snake-glow: 120 100% 70%;
+    --food: 0 100% 50%;
+    --food-glow: 0 100% 70%;
+    --grid: 120 100% 15%;
+    --wall: 180 100% 50%;
+
+    /* Glows */
+    --glow-primary: 0 0 20px hsl(120 100% 50% / 0.5), 0 0 40px hsl(120 100% 50% / 0.3);
+    --glow-secondary: 0 0 20px hsl(180 100% 50% / 0.5), 0 0 40px hsl(180 100% 50% / 0.3);
+    --glow-food: 0 0 15px hsl(0 100% 50% / 0.6), 0 0 30px hsl(0 100% 50% / 0.4);
+
+    /* Sidebar vars for compatibility */
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 120 100% 50%;
+    --sidebar-primary: 120 100% 50%;
+    --sidebar-primary-foreground: 240 10% 4%;
+    --sidebar-accent: 180 100% 50%;
+    --sidebar-accent-foreground: 240 10% 4%;
+    --sidebar-border: 120 100% 25%;
+    --sidebar-ring: 120 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono antialiased;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* CRT scanline effect */
+  .crt-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+}
+
+@layer components {
+  .neon-text {
+    text-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary));
+  }
+
+  .neon-text-cyan {
+    text-shadow: 0 0 5px hsl(var(--secondary)), 0 0 10px hsl(var(--secondary)), 0 0 20px hsl(var(--secondary));
+  }
+
+  .neon-border {
+    box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), inset 0 0 5px hsl(var(--primary) / 0.3);
+  }
+
+  .neon-border-cyan {
+    box-shadow: 0 0 5px hsl(var(--secondary)), 0 0 10px hsl(var(--secondary)), inset 0 0 5px hsl(var(--secondary) / 0.3);
+  }
+
+  .arcade-title {
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  .pixel-corners {
+    clip-path: polygon(
+      0 4px, 4px 4px, 4px 0,
+      calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+      4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+    );
+  }
+
+  .game-grid {
+    background-image: 
+      linear-gradient(hsl(var(--grid)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid)) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Blinking animation for arcade feel */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px hsl(var(--primary))); }
+    50% { filter: drop-shadow(0 0 15px hsl(var(--primary))); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .animate-blink {
+    animation: blink 1s infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
