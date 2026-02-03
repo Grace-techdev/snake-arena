@@ -1,0 +1,27 @@
+{
+  "name": "snake-arena",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && uv run uvicorn app.main:app --reload",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Grace-techdev/snake-arena.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Grace-techdev/snake-arena/issues"
+  },
+  "homepage": "https://github.com/Grace-techdev/snake-arena#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
