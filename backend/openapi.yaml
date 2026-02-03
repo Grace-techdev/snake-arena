@@ -1,0 +1,326 @@
+openapi: 3.0.0
+info:
+  title: Snake Arena API
+  description: Backend API for the Snake Arena multiplayer game
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+components:
+  schemas:
+    # User Schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        avatar:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - email
+        - createdAt
+
+    # Game Schemas
+    GameMode:
+      type: string
+      enum: [walls, pass-through]
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        rank:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        score:
+          type: integer
+        mode:
+          $ref: '#/components/schemas/GameMode'
+        date:
+          type: string
+          format: date
+      required:
+        - id
+        - rank
+        - userId
+        - username
+        - score
+        - mode
+        - date
+
+    LiveGame:
+      type: object
+      properties:
+        id:
+          type: string
+        playerId:
+          type: string
+        playerName:
+          type: string
+        currentScore:
+          type: integer
+        mode:
+          $ref: '#/components/schemas/GameMode'
+        status:
+          type: string
+          enum: [playing, finished]
+        startedAt:
+          type: string
+          format: date-time
+        viewerCount:
+          type: integer
+      required:
+        - id
+        - playerId
+        - playerName
+        - currentScore
+        - mode
+        - status
+        - startedAt
+        - viewerCount
+
+    # Request/Response Schemas
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    SignupRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - username
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+        error:
+          type: string
+      required:
+        - success
+
+    ScoreSubmission:
+      type: object
+      properties:
+        score:
+          type: integer
+        mode:
+          $ref: '#/components/schemas/GameMode'
+      required:
+        - score
+        - mode
+
+    ScoreResponse:
+      type: object
+      properties:
+        rank:
+          type: integer
+        isHighScore:
+          type: boolean
+      required:
+        - rank
+        - isHighScore
+
+    JoinGameResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          type: string
+      required:
+        - success
+
+paths:
+  # Auth Routes
+  /auth/login:
+    post:
+      summary: Login user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/signup:
+    post:
+      summary: Register new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      tags: [Auth]
+      responses:
+        '200':
+          description: Successfully logged out
+
+  /auth/me:
+    get:
+      summary: Get current authenticated user
+      tags: [Auth]
+      responses:
+        '200':
+          description: Current user or null
+          content:
+            application/json:
+              schema:
+                nullable: true
+                allOf:
+                  - $ref: '#/components/schemas/User'
+
+  # Leaderboard Routes
+  /leaderboard:
+    get:
+      summary: Get leaderboard entries
+      tags: [Leaderboard]
+      parameters:
+        - in: query
+          name: mode
+          schema:
+            $ref: '#/components/schemas/GameMode'
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          required: false
+      responses:
+        '200':
+          description: List of leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeaderboardEntry'
+
+    post:
+      summary: Submit a new score
+      tags: [Leaderboard]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreSubmission'
+      responses:
+        '200':
+          description: Score submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreResponse'
+
+  # Spectator Routes
+  /games:
+    get:
+      summary: Get list of live games
+      tags: [Spectator]
+      responses:
+        '200':
+          description: List of live games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LiveGame'
+
+  /games/{gameId}/join:
+    post:
+      summary: Join a game as spectator
+      tags: [Spectator]
+      parameters:
+        - in: path
+          name: gameId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Join result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinGameResponse'
+
+  /games/{gameId}/leave:
+    post:
+      summary: Leave a game
+      tags: [Spectator]
+      parameters:
+        - in: path
+          name: gameId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successfully left game
