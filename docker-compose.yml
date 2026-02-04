@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
-  backend:
-    build: ./backend
+  app:
+    build: .
     restart: always
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/snake_arena
@@ -11,16 +9,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    networks:
-      - snake-network
-
-  frontend:
-    build: ./frontend
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
     networks:
       - snake-network
 

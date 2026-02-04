@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: snake-arena
+    env: docker
+    plan: free
+    # Health check path to verify service is up
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: snake-db
+          property: connectionString
+      - key: SEED_DB
+        value: "true"
+      # Secure random secret for sessions/auth if needed (good practice)
+      - key: SECRET_KEY
+        generateValue: true
+
+databases:
+  - name: snake-db
+    plan: free
+    databaseName: snake_arena
+    user: snake_user
