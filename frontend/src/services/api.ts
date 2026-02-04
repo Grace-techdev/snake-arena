@@ -13,7 +13,7 @@ import type {
   GameState
 } from '@/types/game';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '/api';
 
 // ============ AUTH API ============
 

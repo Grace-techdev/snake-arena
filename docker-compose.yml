@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/snake_arena
+      - SEED_DB=true
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - snake-network
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - snake-network
+
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=snake_arena
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - snake-network
+
+networks:
+  snake-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

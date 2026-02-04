@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, status, Query, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
@@ -8,6 +9,7 @@ from .models import (
     LiveGame, JoinGameResponse
 )
 from .database import db
+from .init_db import seed_data
 
 app = FastAPI(
     title="Snake Arena API",
@@ -28,6 +30,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await db.init_db()
+    if os.getenv("SEED_DB") == "true":
+        await seed_data()
 
 # Auth Routes
 @app.post("/auth/login", response_model=AuthResponse, tags=["Auth"])
