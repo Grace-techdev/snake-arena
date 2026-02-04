@@ -15,6 +15,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +24,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    await db.init_db()
 
 # Auth Routes
 @app.post("/auth/login", response_model=AuthResponse, tags=["Auth"])

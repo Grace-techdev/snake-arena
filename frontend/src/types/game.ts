@@ -2,6 +2,7 @@
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 export type GameMode = 'walls' | 'pass-through';
 export type GameStatus = 'idle' | 'playing' | 'paused' | 'game-over';
+export type GameSpeed = 'slow' | 'normal' | 'fast';
 
 export interface Position {
   x: number;

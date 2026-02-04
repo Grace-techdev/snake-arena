@@ -1,9 +1,15 @@
-import type { Position, Direction, GameState, GameMode, GameConfig } from '@/types/game';
+import type { Position, Direction, GameState, GameMode, GameConfig, GameSpeed } from '@/types/game';
+
+export const SPEEDS: Record<GameSpeed, number> = {
+  slow: 200,
+  normal: 150,
+  fast: 100,
+};
 
 export const DEFAULT_CONFIG: GameConfig = {
   gridSize: 20,
   cellSize: 20,
-  initialSpeed: 150,
+  initialSpeed: SPEEDS.normal,
   speedIncrement: 5,
   maxSpeed: 50,
 };
@@ -11,10 +17,10 @@ export const DEFAULT_CONFIG: GameConfig = {
 /**
  * Creates initial game state
  */
-export function createInitialState(mode: GameMode, gridSize: number): GameState {
+export function createInitialState(mode: GameMode, gridSize: number, initialSpeed: number = DEFAULT_CONFIG.initialSpeed): GameState {
   const centerX = Math.floor(gridSize / 2);
   const centerY = Math.floor(gridSize / 2);
-  
+
   return {
     snake: [
       { x: centerX, y: centerY },
@@ -26,7 +32,7 @@ export function createInitialState(mode: GameMode, gridSize: number): GameState 
     score: 0,
     status: 'idle',
     mode,
-    speed: DEFAULT_CONFIG.initialSpeed,
+    speed: initialSpeed,
   };
 }
 
@@ -35,7 +41,7 @@ export function createInitialState(mode: GameMode, gridSize: number): GameState 
  */
 export function generateFood(snake: Position[], gridSize: number): Position {
   const occupied = new Set(snake.map(p => `${p.x},${p.y}`));
-  
+
   let position: Position;
   do {
     position = {
@@ -43,7 +49,7 @@ export function generateFood(snake: Position[], gridSize: number): Position {
       y: Math.floor(Math.random() * gridSize),
     };
   } while (occupied.has(`${position.x},${position.y}`));
-  
+
   return position;
 }
 
@@ -51,21 +57,21 @@ export function generateFood(snake: Position[], gridSize: number): Position {
  * Gets the next position based on current position and direction
  */
 export function getNextPosition(
-  position: Position, 
-  direction: Direction, 
-  gridSize: number, 
+  position: Position,
+  direction: Direction,
+  gridSize: number,
   mode: GameMode
 ): Position {
   let newX = position.x;
   let newY = position.y;
-  
+
   switch (direction) {
     case 'UP': newY--; break;
     case 'DOWN': newY++; break;
     case 'LEFT': newX--; break;
     case 'RIGHT': newX++; break;
   }
-  
+
   // Handle pass-through mode (wrap around)
   if (mode === 'pass-through') {
     if (newX < 0) newX = gridSize - 1;
@@ -73,7 +79,7 @@ export function getNextPosition(
     if (newY < 0) newY = gridSize - 1;
     if (newY >= gridSize) newY = 0;
   }
-  
+
   return { x: newX, y: newY };
 }
 
@@ -82,7 +88,7 @@ export function getNextPosition(
  */
 export function checkWallCollision(position: Position, gridSize: number, mode: GameMode): boolean {
   if (mode === 'pass-through') return false;
-  
+
   return (
     position.x < 0 ||
     position.x >= gridSize ||
@@ -96,7 +102,7 @@ export function checkWallCollision(position: Position, gridSize: number, mode: G
  */
 export function checkSelfCollision(position: Position, snake: Position[]): boolean {
   // Check collision with body (skip head at index 0)
-  return snake.slice(1).some(segment => 
+  return snake.slice(1).some(segment =>
     segment.x === position.x && segment.y === position.y
   );
 }
@@ -118,7 +124,7 @@ export function isValidDirectionChange(current: Direction, next: Direction): boo
     'LEFT': 'RIGHT',
     'RIGHT': 'LEFT',
   };
-  
+
   return current !== opposites[next];
 }
 
@@ -135,38 +141,38 @@ export function calculateSpeed(score: number, config: GameConfig): number {
  */
 export function gameTick(state: GameState, gridSize: number, config: GameConfig): GameState {
   if (state.status !== 'playing') return state;
-  
+
   const head = state.snake[0];
   const newHead = getNextPosition(head, state.direction, gridSize, state.mode);
-  
+
   // Check wall collision
   if (checkWallCollision(newHead, gridSize, state.mode)) {
     return { ...state, status: 'game-over' };
   }
-  
+
   // Check self collision - but exclude the tail since it will move
   // We need to check against the snake body WITHOUT the last segment (since it moves away)
   const bodyToCheck = state.snake.slice(0, -1);
   if (bodyToCheck.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
     return { ...state, status: 'game-over' };
   }
-  
+
   // Check food collision
   const ateFood = checkFoodCollision(newHead, state.food);
-  
+
   // Create new snake
   const newSnake = [newHead, ...state.snake];
   if (!ateFood) {
     newSnake.pop(); // Remove tail if didn't eat
   }
-  
+
   // Calculate new score and speed
   const newScore = ateFood ? state.score + 10 : state.score;
   const newSpeed = calculateSpeed(newScore, config);
-  
+
   // Generate new food if eaten
   const newFood = ateFood ? generateFood(newSnake, gridSize) : state.food;
-  
+
   return {
     ...state,
     snake: newSnake,
@@ -181,10 +187,10 @@ export function gameTick(state: GameState, gridSize: number, config: GameConfig)
  */
 export function handleDirectionChange(state: GameState, newDirection: Direction): GameState {
   if (state.status !== 'playing') return state;
-  
+
   if (isValidDirectionChange(state.direction, newDirection)) {
     return { ...state, direction: newDirection };
   }
-  
+
   return state;
 }

@@ -13,7 +13,7 @@ interface SnakeGameProps {
 
 export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
   const { isAuthenticated } = useAuth();
-  
+
   const handleGameOver = async (score: number) => {
     if (isAuthenticated && score > 0) {
       try {
@@ -27,14 +27,16 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
       }
     }
   };
-  
+
   const {
     gameState,
+    speedLevel,
     startGame,
     pauseGame,
     resumeGame,
     resetGame,
     changeMode,
+    changeSpeed,
   } = useSnakeGame({
     gridSize: DEFAULT_CONFIG.gridSize,
     mode: 'walls',
@@ -52,7 +54,7 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
           cellSize={DEFAULT_CONFIG.cellSize}
           showWalls={gameState.mode === 'walls'}
         />
-        
+
         {/* Overlay for idle/paused/game-over states */}
         {gameState.status !== 'playing' && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
@@ -63,14 +65,14 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
                   <p className="text-muted-foreground text-sm">Press START to play</p>
                 </>
               )}
-              
+
               {gameState.status === 'paused' && (
                 <>
                   <h2 className="font-arcade text-xl neon-text-cyan">PAUSED</h2>
                   <p className="text-muted-foreground text-sm">Press RESUME to continue</p>
                 </>
               )}
-              
+
               {gameState.status === 'game-over' && (
                 <>
                   <h2 className="font-arcade text-xl text-destructive">GAME OVER</h2>
@@ -82,7 +84,7 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
           </div>
         )}
       </div>
-      
+
       {/* Side Panel */}
       <div className="flex flex-col gap-6 min-w-[200px]">
         {/* Score Display */}
@@ -90,7 +92,7 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
           <p className="text-xs text-muted-foreground uppercase tracking-widest">Score</p>
           <p className="font-arcade text-3xl neon-text">{gameState.score}</p>
         </div>
-        
+
         {/* Mode Display */}
         <div className="text-center lg:text-left">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">Mode</p>
@@ -98,16 +100,18 @@ export function SnakeGame({ onScoreSubmit }: SnakeGameProps) {
             {gameState.mode === 'walls' ? 'WALLS' : 'PASS-THRU'}
           </p>
         </div>
-        
+
         {/* Controls */}
         <GameControls
           status={gameState.status}
           mode={gameState.mode}
+          speed={speedLevel}
           onStart={startGame}
           onPause={pauseGame}
           onResume={resumeGame}
           onReset={() => resetGame()}
           onModeChange={changeMode}
+          onSpeedChange={changeSpeed}
         />
       </div>
     </div>
