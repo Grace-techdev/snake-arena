@@ -61,6 +61,24 @@ async def seed_data():
                     date=date.today()
                 ))
         
+        # 3. Grace (Requested)
+        grace_email = "grace@snake.io"
+        result = await session.execute(select(UserDB).where(UserDB.email == grace_email))
+        if not result.scalar_one_or_none():
+            grace_user = UserDB(
+                id=str(uuid.uuid4()),
+                username="Grace",
+                email=grace_email,
+                password_hash=get_password_hash("password"),
+                created_at=datetime.utcnow()
+            )
+            session.add(grace_user)
+            print("Added Grace")
+            
+            # Add two records (scores) as requested
+            session.add(ScoreDB(id=str(uuid.uuid4()), user_id=grace_user.id, score=2500, mode=GameMode.walls, date=date.today()))
+            session.add(ScoreDB(id=str(uuid.uuid4()), user_id=grace_user.id, score=3100, mode=GameMode.pass_through, date=date.today()))
+        
         await session.commit()
         print("Seeding complete.")
 

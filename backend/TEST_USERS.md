@@ -24,5 +24,6 @@ All additional users have the password: **`password`**
 | RattleSnake | `rattlesnake@snake.io` |
 | CobraCommander | `cobracommander@snake.io` |
 | MambaMentality | `mambamentality@snake.io` |
+| **Grace** | `grace@snake.io` |
 
 > **Note**: These users are reset every time the backend server restarts.
