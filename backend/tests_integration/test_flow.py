@@ -11,7 +11,7 @@ async def test_score_submission_flow(client: AsyncClient):
         "password": "securepassword123"
     }
     
-    auth_response = await client.post("/auth/signup", json=user_data)
+    auth_response = await client.post("/api/auth/signup", json=user_data)
     assert auth_response.status_code == 201
     assert auth_response.json()["success"] is True
     
@@ -25,7 +25,7 @@ async def test_score_submission_flow(client: AsyncClient):
     
     # The API requires 'email' query param for auth (simulated)
     response = await client.post(
-        "/leaderboard", 
+        "/api/leaderboard", 
         params={"email": user_data["email"]}, 
         json=score_data
     )
@@ -43,7 +43,7 @@ async def test_score_submission_flow(client: AsyncClient):
     }
     
     response_low = await client.post(
-        "/leaderboard", 
+        "/api/leaderboard", 
         params={"email": user_data["email"]}, 
         json=score_data_low
     )
@@ -54,7 +54,7 @@ async def test_score_submission_flow(client: AsyncClient):
     assert data_low["isHighScore"] is True # Top 10 still valid in empty DB
     
     # 4. Verify Leaderboard contains both
-    leaderboard_response = await client.get("/leaderboard")
+    leaderboard_response = await client.get("/api/leaderboard")
     assert leaderboard_response.status_code == 200
     lb_data = leaderboard_response.json()
     

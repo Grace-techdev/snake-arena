@@ -37,9 +37,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --frozen --all-extras --dev
       - name: Run tests
-        run: uv run pytest
+        # We need to make sure pytest is available in the environment
+        run: |
+          uv run pytest
 
   deploy:
     needs: [test-frontend, test-backend]
