@@ -40,6 +40,9 @@ jobs:
         run: uv sync --frozen --all-extras --dev
       - name: Run tests
         # We need to make sure pytest is available in the environment
+        # And ensure the current directory is in PYTHONPATH so 'app' module can be found
+        env:
+          PYTHONPATH: .
         run: |
           uv run pytest
 
