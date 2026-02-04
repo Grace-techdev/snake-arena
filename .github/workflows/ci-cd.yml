@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  test-backend:
+  test-backend-unit:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,16 +38,33 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: uv sync --frozen --all-extras --dev
-      - name: Run tests
-        # We need to make sure pytest is available in the environment
-        # And ensure the current directory is in PYTHONPATH so 'app' module can be found
+      - name: Run Unit Tests
         env:
           PYTHONPATH: .
-        run: |
-          uv run pytest
+        run: uv run pytest tests/
+
+  test-backend-integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: uv sync --frozen --all-extras --dev
+      - name: Run Integration Tests
+        env:
+          PYTHONPATH: .
+        run: uv run pytest tests_integration/
 
   deploy:
-    needs: [test-frontend, test-backend]
+    needs: [test-frontend, test-backend-unit, test-backend-integration]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
